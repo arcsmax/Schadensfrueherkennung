@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Daten und Ergebnisse
+data/
+results/
+.cache_status/
+
+# IDE-spezifische Ordner
+.vscode/
+.idea/
+.DS_Store
+processed_data/phm2023_na_complete_data.parquet
+processed_data/phm2023_na_features.parquet
