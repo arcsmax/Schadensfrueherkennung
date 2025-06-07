@@ -41,3 +41,12 @@ Um die vollständige Pipeline auszuführen (Datengenerierung, Feature-Extraktion
 ```bash
 python main.py
 ```
+
+## Wichtig
+
+Nach jeder Änderung des Codes muss die alte Marker-Datei gelöscht werden.
+```bash
+rm .cache_status/.data_generation.success
+```
+
+Viel Spaß :)
