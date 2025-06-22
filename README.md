@@ -1,6 +1,6 @@
 # Industrielle Schadensfrüherkennung
 
-Ein Prototyp zur Früherkennung von Schäden in industriellen Anlagen basierend auf Vibrationssensordaten. Dieses Repository enthält eine vollständige ML-Pipeline von der Datenvorverarbeitung über Feature-Engineering und Modelltraining bis hin zur Extraktion und CLI-Ausführung.
+Ein Prototyp zur Früherkennung von Schäden in industriellen Anlagen basierend auf Vibrationssensordaten. Dieses Repository ist darauf ausgelegt eine vollständige ML-Pipeline von der Datenvorverarbeitung über Feature-Engineering und Modelltraining bis hin zur Extraktion und CLI-Ausführung zu enthalten.
 
 ---
 
