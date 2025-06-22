@@ -32,6 +32,12 @@ Ein Prototyp zur Früherkennung von Schäden in industriellen Anlagen basierend 
 - **CLI-Tools**: Steuerung der Feature-Extraktion und der gesamten End-to-End-Pipeline über Kommandozeile.
 - **Zentralisierte Konfiguration**: Alle Parameter und Pfade in `src/config.py` verwaltet.
 
+### Projekt-Highlights & Performance
+
+Dieses Projekt umfasst nicht nur ein funktionsfähiges ML-Modell, sondern auch eine nach professionellen MLOps-Prinzipien entworfene, robuste und performante Pipeline. Eine detaillierte Analyse der Architektur und der erzielten Performance-Optimierungen finden Sie in unserem gesonderten Projektbericht.
+
+➡️ **[Zum vollständigen Projektbericht: Performance-Optimierung & Pipeline-Architektur](./performance-optimierung.md)**
+
 ### Geplante Features
 
 - **Explainable AI (XAI)**: Integration von SHAP oder LIME für transparente Modellentscheidungen.

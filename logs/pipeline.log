@@ -1,0 +1,12 @@
+2025-06-22 10:45:09,847 [INFO] ==================================================
+2025-06-22 10:45:09,848 [INFO] STARTE SCHADENSFRÜHERKENNUNGS-ORCHESTRATOR
+2025-06-22 10:45:09,849 [INFO] Cache-Marker für 'data_processing' gefunden.
+2025-06-22 10:45:09,849 [INFO] Schritt 1 (Datenverarbeitung) wird aufgrund des Caches übersprungen.
+2025-06-22 10:45:09,850 [INFO] Kein Cache-Marker für 'feature_engineering' gefunden. Schritt wird ausgeführt.
+2025-06-22 10:45:09,850 [INFO] Starte paralleles Feature Engineering für TRAININGS-Daten...
+2025-06-22 10:46:27,847 [INFO] Feature Engineering erfolgreich. 2016 Feature-Vektoren gespeichert in: /Users/maxbook/Documents/Github/Schadensfrueherkennung/data/processed_features_train.csv
+2025-06-22 10:46:27,850 [INFO] Cache-Marker für 'feature_engineering' erfolgreich erstellt/aktualisiert.
+2025-06-22 10:46:27,850 [INFO] Cache-Marker für 'model_training' gefunden.
+2025-06-22 10:46:27,851 [INFO] Schritt 3 (Modelltraining) wird aufgrund des Caches übersprungen.
+2025-06-22 10:46:27,851 [INFO] ORCHESTRATOR-LAUF BEENDET
+2025-06-22 10:46:27,851 [INFO] ==================================================

@@ -1,32 +1,40 @@
 # src/config.py
 """
-Zentrale Konfigurationsdatei, erweitert um Pfade für den Test-Workflow.
+Zentrale Konfigurationsdatei für die Schadensfrüherkennungs-Pipeline.
+Enthält alle Pfade, physikalischen Parameter und Modell-Hyperparameter.
 """
 from pathlib import Path
 
+# -- Basis-Pfade und Verzeichnisse --
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 RESULTS_DIR = BASE_DIR / "results"
 CACHE_STATUS_DIR = BASE_DIR / ".cache_status"
-TRAIN_SOURCE_DATA_PATH = BASE_DIR / "data" / "Data_Challenge_PHM2023_training_data"
+
+# NEU: Logging-Konfiguration
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+LOG_FILE_PATH = LOG_DIR / "pipeline.log"
+
+# -- Datenpfade --
+# Trainingsdaten
+TRAIN_SOURCE_DATA_PATH = DATA_DIR / "Data_Challenge_PHM2023_training_data"
 TRAIN_METADATA_PATH = DATA_DIR / "phm_metadata_train.csv"
 TRAIN_PROCESSED_FEATURES_PATH = DATA_DIR / "processed_features_train.csv"
+
+# Testdaten (für die finale, ungesehene Evaluation)
 TEST_SOURCE_DATA_PATH = DATA_DIR / "test_data"
 TEST_METADATA_PATH = DATA_DIR / "phm_metadata_test.csv"
 TEST_PROCESSED_FEATURES_PATH = DATA_DIR / "processed_features_test.csv"
 
-# Ergebnis- und Modellpfade
+# -- Ergebnis- und Modellpfade --
 SAVED_MODEL_PATH = RESULTS_DIR / "final_model.joblib"
-SAVED_PREPROCESSOR_PATH = RESULTS_DIR / "preprocessor.joblib" # NEU: Für den Skalierer
+SAVED_PREPROCESSOR_PATH = RESULTS_DIR / "preprocessor.joblib"
+SAVED_MODEL_COLUMNS_PATH = RESULTS_DIR / "model_columns.joblib" # Für Spaltennamen
 TRAIN_VISUALIZATION_PATH = RESULTS_DIR / "feature_comparison_plot_train.png"
-VALIDATION_CLASSIFICATION_REPORT_PATH = RESULTS_DIR / "validation_classification_report.txt" # NEU
+VALIDATION_CLASSIFICATION_REPORT_PATH = RESULTS_DIR / "validation_classification_report.txt"
 TEST_CLASSIFICATION_REPORT_PATH = RESULTS_DIR / "final_test_classification_report.txt"
 
-# Success Marker-Dateien
-TRAIN_METADATA_MARKER = CACHE_STATUS_DIR / ".metadata_creation_train.success"
-TRAIN_FEATURES_MARKER = CACHE_STATUS_DIR / ".feature_extraction_train.success"
-TEST_METADATA_MARKER = CACHE_STATUS_DIR / ".metadata_creation_test.success"
-TEST_FEATURES_MARKER = CACHE_STATUS_DIR / ".feature_extraction_test.success"
 
 # Verzeichnisse erstellen
 DATA_DIR.mkdir(exist_ok=True)
