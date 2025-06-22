@@ -1,221 +1,257 @@
-# Industrielle Schadensfrüherkennung
+# Industrielle Schadensfrüherkennung (Predictive Maintenance)
 
 Ein Prototyp zur Früherkennung von Schäden in industriellen Anlagen basierend auf Vibrationssensordaten. Dieses Repository ist darauf ausgelegt eine vollständige ML-Pipeline von der Datenvorverarbeitung über Feature-Engineering und Modelltraining bis hin zur Extraktion und CLI-Ausführung zu enthalten.
 
 ---
 
 ## Inhaltsverzeichnis
-
-1. [Features](#features)
+1. [Kernfeatures & Innovationen](#kernfeatures--innovationen)
 2. [Projektstruktur](#projektstruktur)
-3. [Installation](#installation)
+3. [Installation & Setup](#installation--setup)
 4. [Konfiguration](#konfiguration)
-5. [Datenverarbeitung](#datenverarbeitung)
-6. [Feature-Engineering](#feature-engineering)
-7. [Modelltraining](#modelltraining)
-8. [Pipeline-Ausführung](#pipeline-ausf%C3%BChrung)
-9. [Roadmap & Verbesserungen](#roadmap--verbesserungen)
-10. [Lizenz](#lizenz)
+5. [Pipeline-Komponenten](#pipeline-komponenten)
+   - [Datenverarbeitung](#datenverarbeitung)
+   - [Feature-Engineering](#feature-engineering)
+   - [Modelltraining](#modelltraining)
+   - [Automatisierte Ausführung (CLI)](#automatisierte-ausführung-cli)
+6. [Wichtige Hinweise](#wichtige-hinweise)
+7. [Roadmap & Vision](#roadmap--vision)
+8. [Mitwirken (Contributing)](#mitwirken-contributing)
+9. [Lizenz](#lizenz)
 
 ---
 
-## Features
+## Kernfeatures & Innovationen
 
-- Simulation und Einlesen von Rohdaten
-- Standard-Skalierung und Split in Training/Test
-- Extraktion umfangreicher Zeit- und Frequenzbereichsmerkmale
-- Training und Evaluierung klassischer ML-Modelle
-- CLI-Tools zur Automatisierung von Extraktion und End-to-End-Lauf
-- Konfigurierbare Parameter über zentrale `config.py`
+### Aktuelle Features
+
+- **Daten-Simulation & Einlesen**: Verarbeitung von Rohdaten aus gängigen Formaten (CSV, Parquet, Datenbanken).
+- **Modulare Vorverarbeitung**: Standard-Skalierung und strategischer Split in Trainings-, Validierungs- und Test-Sets.
+- **Umfangreiches Feature-Engineering**: Extraktion von über 50 Merkmalen aus Zeit- und Frequenzbereich (statistische Momente, spektrale Kennwerte etc.).
+- **Klassisches ML-Training**: Training und Evaluierung robuster Modelle (Random Forest, SVM, Gradient Boosting).
+- **CLI-Tools**: Steuerung der Feature-Extraktion und der gesamten End-to-End-Pipeline über Kommandozeile.
+- **Zentralisierte Konfiguration**: Alle Parameter und Pfade in `src/config.py` verwaltet.
+
+### Geplante Features
+
+- **Explainable AI (XAI)**: Integration von SHAP oder LIME für transparente Modellentscheidungen.
+- **Automated Feature Engineering (AutoML)**: Bibliotheken wie FeatureTools, um komplexe Merkmale automatisch zu entdecken.
+- **Deep Learning für Zeitreihen**: 1D-CNNs und Transformer-Modelle, um Merkmale direkt aus Rohsignalen zu lernen.
+- **Anomalieerkennung mit Autoencodern**: Training auf gesunden Daten, um unbekannte Fehlertypen als Anomalien zu erkennen.
+- **Digitale Zwillings-Integration**: Verbindung zu einem digitalen Zwilling für "Was-wäre-wenn"-Szenarien und Visualisierung.
 
 ---
 
 ## Projektstruktur
 
-```
+```plaintext
 Schadensfrueherkennung/             # Projekt-Root
-├── .venv/                         # Virtuelle Umgebung
-├── data/                          # Roh- und vorverarbeitete Daten
-│   ├── Data_Challenge_PHM2023_training_data/  # Original-Trainingsdaten
-├── notebooks/                     # Jupyter-Notebooks und Zwischenformate
-│── processed_data/                # Verarbeitete Datten und Berichte
-│   ├── phm2023_na_complete_data.parquet
-│   └── phm2023_na_features.parquet
-├── results/                       # Modellreports und Visualisierungen
+├── data/                          # Lokale Roh- und Vorverarbeitete Daten
+│   ├── raw/                       # Original-Rohdaten (CSV, Parquet)
+│   └── processed/                 # Verarbeitete Feature-Sets
+├── notebooks/                     # Jupyter-Notebooks für Analyse & Prototyping
+├── results/                       # Modellreports, Visualisierungen
 │   ├── classification_report.txt
-│   └── feature_comparison_plot.png
+│   └── feature_importance.png
 ├── src/                           # Quellcode der ML-Pipeline
 │   ├── feature_engineering/       # Modul für Feature-Extraktion
-│   │   ├── __init__.py
-│   │   ├── main_extractor.py      # CLI nur für Feature-Extraction
-│   │   ├── order_analysis.py      # Analyse der Merkmalshierarchie
+│   │   ├── main_extractor.py      # CLI für Feature-Extraction
+│   │   ├── order_analysis.py      # Analyse der Merkmals-Hierarchie
 │   │   ├── time_domain.py         # Zeitbereichskennwerte
 │   │   └── time_frequency.py      # Frequenzbereichskennwerte
-│   ├── config.py                  # Zentrale Einstellungen und Pfade
-│   ├── data_processing.py         # Datengenerierung, Skalierung, Split
-│   ├── feature_engineering.py     # Orchestrierung der Feature-Pipeline
-│   ├── model_training.py          # Training und Evaluierung der Modelle
-│   ├── utils.py                   # Hilfsfunktionen für Logging & Visualisierung
+│   ├── config.py                  # Zentrale Einstellungen & Pfade
+│   ├── data_processing.py         # Daten-Generator, Skalierung & Split
+│   ├── feature_engineering.py     # Orchestrierung des Feature-Flows
+│   ├── model_training.py          # Training & Evaluierung der Modelle
+│   ├── utils.py                   # Logging, I/O, Visualisierung
 │   └── main.py                    # CLI für End-to-End-Pipeline
-├── feature_extractor_utils.py     # Zusätzliche Feature-Utilityfunktionen
-├── main.py                        # Alternative Einstiegspunkt / Wrapper
-├── README.md                      # Projektbeschreibung und Anleitung
+├── tests/                         # Unit- und Integrations-Tests
+├── .cache_status/                 # Cache-Dateien zur Statusverfolgung
 ├── requirements.txt               # Python-Abhängigkeiten
-├── .gitignore                     # Ausschlussliste für Versionskontrolle
+├── .gitignore                     # Versionskontrolle Ausnahmen
+└── README.md                      # Projektbeschreibung
 ```
+
 ---
 
-## Installation
+## Installation & Setup
 
 Folge diesen Schritten, um das Projekt auf Linux, macOS oder Windows lokal einzurichten:
 
-### 1. Repository klonen
+1. **Repository klonen**
 
-```bash
-git clone https://github.com/arcsmax/Schadensfrueherkennung.git
-cd Schadensfrueherkennung
-```
+   ```bash
+   git clone https://github.com/arcsmax/Schadensfrueherkennung.git
+   cd Schadensfrueherkennung
+   ```
 
-### 2. Systemvoraussetzungen prüfen
+2. **Systemvoraussetzungen prüfen**
 
-- **Python**: Version ≥ 3.8 installiert?  
-  ```bash
-  python --version
-  ```
-- **pip**: Aktuellstes `pip` verwenden:
-  ```bash
-  pip install --upgrade pip
-  ```
+   - Python ≥ 3.8 installiert?  `python --version`
+   - Aktualisiere `pip`:  `pip install --upgrade pip`
 
-### 3. Virtuelle Umgebung einrichten
+3. **Virtuelle Umgebung einrichten**
 
-Um Versionskonflikte zu vermeiden, solltest du eine isolierte Umgebung verwenden.
+   - Linux/macOS:
 
-- Auf **Linux/macOS**:
-  ```bash
-  python -m venv venv
-  source venv/bin/activate
-  ```
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
 
-- Auf **Windows** (PowerShell):
-  ```powershell
-  python -m venv venv
-  .\venv\Scripts\Activate.ps1
-  ```
+   - Windows (PowerShell):
 
-- Auf **Windows** (CMD):
-  ```cmd
-  python -m venv venv
-  venv\Scripts\activate.bat
-  ```
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
 
-Nach Aktivierung sollte die Shell-Eingabe eine `(venv)`-Kennzeichnung zeigen.
+   - Windows (CMD):
 
-### 4. Abhängigkeiten installieren
+   ```cmd
+   python -m venv .venv
+   .venv\Scripts\activate.bat
+   ```
 
-Mit aktivierter virtueller Umgebung installiere alle benötigten Pakete:
+4. **Abhängigkeiten installieren**
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-> **Tipp:** Wenn du Probleme mit einzelnen Paketen hast, prüfe die passende Python-Version oder installiere systemweite Abhängigkeiten (z. B. `build-essential`, `libomp`).
+> **Tipp:** Bei Problemen mit Paketen (z. B. SciPy), installiere systemweite Bibliotheken (`build-essential`, `libomp`).
 
 ---
 
 ## Konfiguration
 
-Alle Pfade, Hyperparameter und globalen Settings befinden sich in `config.py`. Eine typische Struktur:
+Alle globalen Einstellungen, Pfade und Hyperparameter werden zentral in `src/config.py` verwaltet. Beispiel:
 
 ```python
 # config.py
-data_dir = "./data"
-model_dir = "./models"
-batch_size = 64
-learning_rate = 1e-3
-test_split = 0.2
-# … weitere Einstellungen
+DATA_DIR = "./data"
+MODEL_DIR = "./models"
+BATCH_SIZE = 64
+LEARNING_RATE = 1e-3
+TEST_SPLIT = 0.2
 ```
 
-*Hinweis:* Für größere Projekte empfiehlt sich der Einsatz von `pydantic` oder `dataclasses` zur Validierung sowie Umgebungsvariablen via `python-dotenv`.
+Für Produktionseinsatz empfiehlt sich `python-dotenv` oder Frameworks wie Hydra/Pydantic.
 
 ---
-## Datenverarbeitung
 
-In `data_processing.py` erfolgt die Generierung oder das Einlesen der Vibrationsdaten, gefolgt von Standard-Skalierung und Split in Trainings- und Testdaten.
+## Pipeline-Komponenten
 
-- **Extractor** lädt Rohdaten
-- **Transformer** skaliert und normalisiert
-- **Loader** teilt in Sets auf
+### Datenverarbeitung
 
-*Ausführen:*
+In `src/data_processing.py`:
+
+- **Laden**: Rohdaten gemäß `DATA_DIR` einlesen
+- **Bereinigen**: Fehlende Werte behandeln
+- **Transformieren**: StandardScaler oder eigene Transformer anwenden
+- **Aufteilen**: Split in Trainings- und Test-Sets
 
 ```bash
-python data_processing.py
+python src/data_processing.py
 ```
 
----
+### Feature-Engineering
 
-## Feature-Engineering
+In `src/feature_engineering/`:
 
-Die Extraktion findet in zwei Stufen statt:
-
-1. **Zeitbereich** (`time_domain.py`): Mittelwert, Varianz, RMS, Kurtosis, Crest-Faktor, …
-2. **Frequenzbereich** (`time_frequency.py`): FFT, Spektraldichte, Bandenergie, …
-
-Alles orchestriert durch `feature_engineering.py`, das Funktionen zu einer modularen Pipeline kombiniert.
-
-*Ausführen:*
+- **time\_domain.py**: Statistische Kennwerte (Mittelwert, Varianz, RMS, Kurtosis, Crest-Faktor)
+- **time\_frequency.py**: FFT, Spektraldichte, Band-Energien, dominante Frequenzen
+- **main\_extractor.py**: CLI-Workflow für reine Feature-Extraktion
 
 ```bash
-python feature_engineering.py
+python src/feature_engineering/main_extractor.py \
+  --input-dir ./data/raw \
+  --output-file ./data/processed/features.parquet
 ```
 
----
+### Modelltraining
 
-## Modelltraining
+In `src/model_training.py`:
 
-In `model_training.py` werden Klassifikationsmodelle (z. B. Random Forest, SVM) trainiert und evaluiert (Accuracy, Precision, Recall, F1-Score).
-
-*Ausführen:*
+- Training klassischer Modelle (RandomForest, SVM, etc.)
+- Evaluierung (Accuracy, Precision, Recall, F1-Score)
+- Speichern von Modellen und Berichten in `results/`
 
 ```bash
-python model_training.py
+python src/model_training.py
 ```
 
----
+### Automatisierte Ausführung (CLI)
 
-## Pipeline-Ausführung
+End-to-End-Pipeline:
 
-- End-to-End-Lauf:
-  ```bash
-  python main.py --config config.py
-  ```
-- Nur Feature-Extraktion:
-  ```bash
-  python main_extractor.py --input ./data/raw --output ./data/features
-  ```
+```bash
+python src/main.py --config src/config.py
+```
 
-*CLI-Optionen* lassen sich über `Click` oder `Typer` leicht erweitern.
+Nur Feature-Extraction:
 
----
+```bash
+python src/feature_engineering/main_extractor.py --help
+```
 
-## Roadmap & Verbesserungen
-
-1. **End-to-End Orchestrierung**\
-   Integration von Airflow, Prefect oder Luigi zur Automatisierung, Scheduling und Monitoring.
-2. **Echtzeit-Streaming**\
-   Anbindung von Kafka/MQTT und Windowed-Feature-Extraction für Live-Daten.
-3. **Deep Learning**\
-   1D-CNNs, Transformer-Modelle und Autoencoder für Anomalieerkennung.
-4. **Edge Deployment**\
-   Docker/Kubernetes für Edge-Devices; TensorFlow Lite oder ONNX für schlanke Inferenz.
-5. **Experiment-Tracking & Monitoring**\
-   MLflow oder Weights & Biases, Alerts bei Modell-Drift.
-6. **Tests & CI/CD**\
-   Ausbau zu Unit-, Integrations- und E2E-Tests; GitHub Actions / GitLab CI.
+Für eine erweiterte CLI empfiehlt sich `Click` oder `Typer`.
 
 ---
+
+## Wichtige Hinweise
+
+- **Caching**: Das Projekt nutzt Marker in `.cache_status/` zur Vermeidung wiederholter Rechenoperationen. Bei Code-Änderungen an einem Schritt entferne das entsprechende Marker-File.
+- **Dateipfade**: Passe `DATA_DIR` und `MODEL_DIR` in `config.py` bei Bedarf an.
+
+---
+
+## Roadmap & Vision
+
+### Phase 1: Grundlagen & MLOps
+
+- [ ] Testing Framework: Implementierung von pytest für Unit- und Integrationstests.
+
+- [ ] CI/CD-Pipeline: Einrichtung von GitHub Actions zur automatischen Ausführung von Tests und Linting bei jedem Push.
+
+- [ ] Experiment Tracking: Integration von MLflow oder Weights & Biases zur Protokollierung von Experimenten, Parametern und Metriken.
+
+### Phase 2: Modellierungs-Innovation
+
+- [ ] Explainable AI (XAI): Integration von SHAP zur Visualisierung von Modellentscheidungen.
+
+- [ ] Deep Learning: Implementierung eines 1D-CNN-Modells als Alternative zu klassischem ML.
+
+- [ ] Erweiterte Signalverarbeitung: Einsatz von Wavelet-Transformationen für eine kombinierte Zeit-Frequenz-Analyse.
+
+### Phase 3: Produktivsetzung & Skalierung
+
+- [ ] REST API: Entwicklung einer FastAPI-Schnittstelle, um das Modell für Echtzeitanfragen bereitzustellen.
+
+- [ ] Echtzeit-Streaming: Anbindung an einen Kafka- oder MQTT-Broker zur Verarbeitung von Live-Sensordaten.
+
+- [ ] Containerisierung & Deployment: Erstellung eines Docker-Images und Bereitstellung auf einer Edge- oder Cloud-Plattform (z.B. mit Kubernetes).
+
+---
+
+## Mitwirken (Contributing)
+
+Beiträge sind willkommen! Bitte folge diesen Schritten:
+
+1. Repository forken
+2. Neuen Branch erstellen (`git checkout -b feature/mein-feature`)
+3. Änderungen implementieren & dokumentieren
+4. Code formatieren (`black .`, `isort .`)
+5. Tests hinzufügen und lokal ausführen
+6. Pull Request mit beschreibendem Titel eröffnen
+
+---
+
+## Lizenz
+
+Dieses Projekt steht unter der MIT License. Siehe [LICENSE](./LICENSE) für Details.
+
+
 
 
 
@@ -226,4 +262,4 @@ Nach jeder Änderung des Codes muss die alte Marker-Datei gelöscht werden.
 rm .cache_status/.data_generation.success
 ```
 
-Viel Spaß :)
+Viel Spaß :nerd_face:
