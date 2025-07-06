@@ -17,3 +17,8 @@ results/
 .DS_Store
 processed_data/phm2023_na_complete_data.parquet
 processed_data/phm2023_na_features.parquet
+dashboard.html
+Project_Dashboard.html
+README_thx.md
+logs/pipeline.log
+

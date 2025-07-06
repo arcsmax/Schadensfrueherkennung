@@ -50,4 +50,28 @@ macro avg       0.97      0.97      0.97       404
 weighted avg    0.97      0.97      0.97       404
 ```
 
+---
+
+## Ansatz B: Deep Learning (End-to-End)
+
+**Modell:** 1D Convolutional Neural Network (1D-CNN)
+
+**Vorgehen:**
+Das Modell lernt relevante Merkmale direkt aus den rohen, segmentierten Zeitreihendaten und nutzt GPU-Beschleunigung (z. B. Apple MPS). Manuelles Feature-Engineering entfällt.
+
+**Ergebnis (Validierung):**
+*(Finalen Klassifikationsbericht hier einfügen)*
+
+### Zusammenfassende Bewertung
+
+| Kriterium           | Klassischer Ansatz (RandomForest)             | Deep Learning (1D-CNN)                        |
+| ------------------- | --------------------------------------------- | --------------------------------------------- |
+| **Performance**     | Sehr hoch (F1-Score: 0.97)                   | *(Ergebnis hier eintragen)*                   |
+| **Erklärbarkeit**   | Hoch: Einfluss jedes handgemachten Merkmals   | Niedrig: Modell agiert als "Black Box"       |
+| **Entwicklungsaufwand** | Hoch: Feature Engineering erfordert Domänenwissen | Mittel: Expertise im Deep Learning erforderlich |
+| **Trainingszeit**   | Schnell (Sekunden bis Minuten)               | Lang (Minuten bis Stunden)                   |
+| **Flexibilität**    | Muss bei Datenänderungen angepasst werden    | Potenziell anpassungsfähiger an neue Muster   |
+
+---
+
 Diese Kombination aus starker Modell-Performance und effizienter Engineering-Praxis bildet die Grundlage für ein produktionsreifes System zur Schadensfrüherkennung.

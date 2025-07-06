@@ -20,6 +20,12 @@ except ImportError:
     # damit das Programm nicht abstürzt, sondern nur eine Warnung ausgibt.
     _VISUALS_AVAILABLE = False
 
+# NEU: Definition der Abhängigkeiten zwischen den Pipeline-Schritten.
+# Dies teilt der 'clear_downstream_caches' Funktion mit, welche Schritte von welchem Vorgänger abhängen.
+CACHE_DEPENDENCIES = {
+    'data_processing': ['feature_engineering', 'model_training'],
+    'feature_engineering': ['model_training'],
+}
 
 def setup_logging():
     """
@@ -99,12 +105,24 @@ def clear_cache(step_name: str = None):
             f.unlink()
         logging.info("Alle Cache-Marker wurden entfernt.")
 
+def clear_downstream_caches(changed_step: str):
+    """
+    Löscht die Cache-Marker aller Schritte, die vom 'changed_step' abhängen.
+    
+    Args:
+        changed_step (str): Der Name des Schrittes, der ausgeführt wurde und
+                            dessen nachfolgende Schritte zurückgesetzt werden müssen.
+    """
+    if changed_step in CACHE_DEPENDENCIES:
+        downstream_steps = CACHE_DEPENDENCIES[changed_step]
+        logging.warning(f"Schritt '{changed_step}' wurde ausgeführt. Lösche abhängige Caches: {downstream_steps}")
+        for step_to_clear in downstream_steps:
+            clear_cache(step_to_clear)
+
 def plot_feature_distribution(feature_df: pd.DataFrame, output_path: Path):
     """
     Erstellt und speichert Plots für die Verteilung ausgewählter Merkmale.
     """
-    # KORREKTUR: Wir prüfen zuerst, ob die Bibliotheken verfügbar sind.
-    # Pylance versteht nun, dass der folgende Code nur im "Happy Path" ausgeführt wird.
     if not _VISUALS_AVAILABLE:
         logging.warning("Visualisierungs-Bibliotheken nicht installiert. Überspringe Plot-Erstellung.")
         return
@@ -112,27 +130,36 @@ def plot_feature_distribution(feature_df: pd.DataFrame, output_path: Path):
     logging.info(f"Erstelle Plot zur Merkmalsverteilung und speichere ihn in {output_path}...")
     
     try:
-        plot_cols = [col for col in feature_df.columns if any(key in col for key in ['rms', 'kurtosis', 'gmf'])]
+        # KORREKTUR: Robustere Auswahl der zu plottenden Spalten
+        plot_cols = [
+            'td_rms', 'td_kurtosis', 'td_crest_factor',
+            'oa_gmf_harmonic_1_amp', 'oa_gmf_h1_upper_sb_energy'
+        ]
+        # Filtere auf Spalten, die tatsächlich im DataFrame existieren
+        plot_cols_exist = [col for col in plot_cols if col in feature_df.columns]
         
-        if not plot_cols:
-            logging.warning("Keine typischen Merkmale zum Plotten gefunden. Überspringe Visualisierung.")
+        if not plot_cols_exist:
+            logging.warning("Keine der typischen Merkmale zum Plotten gefunden. Überspringe Visualisierung.")
             return
             
-        n_features = len(plot_cols)
+        n_features = len(plot_cols_exist)
         fig, axes = plt.subplots(n_features, 1, figsize=(12, 5 * n_features), constrained_layout=True)
         if n_features == 1:
             axes = [axes]
             
         fig.suptitle('Vergleich der wichtigsten Merkmalsverteilungen', fontsize=18)
 
-        for i, col in enumerate(plot_cols):
+        for i, col in enumerate(plot_cols_exist):
             sns.histplot(data=feature_df, x=col, hue='label', kde=True, ax=axes[i], palette='viridis')
             axes[i].set_title(f'Verteilung für: {col}', fontsize=12)
             axes[i].set_xlabel('Wert')
             axes[i].set_ylabel('Anzahl')
 
+        # Stelle sicher, dass das Zielverzeichnis existiert
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(output_path)
         plt.close(fig)
         logging.info("Plot erfolgreich erstellt.")
     except Exception as e:
         logging.error(f"Fehler bei der Erstellung des Plots: {e}", exc_info=True)
+

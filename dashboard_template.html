@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse-Dashboard: Schadensfrüherkennung</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            color: #bb86fc;
+            border-bottom: 2px solid #bb86fc;
+            padding-bottom: 0.5rem;
+            margin-top: 3rem;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #333;
+            margin-bottom: 2rem;
+        }
+        .tab-button {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            color: #a0a0a0;
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #bb86fc;
+            border-bottom: 3px solid #bb86fc;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #333;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+        .dl-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .dl-tab-button {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            background-color: #333;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            border-radius: 4px;
+        }
+        .dl-tab-button.active {
+            background-color: #bb86fc;
+            color: #121212;
+            font-weight: bold;
+        }
+        table.report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        table.report-table th, table.report-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        table.report-table th {
+            background-color: #333;
+            font-weight: bold;
+        }
+        table.report-table tr:hover {
+            background-color: #2a2a2a;
+        }
+        .interpretation-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        .interpretation-text ol {
+            padding-left: 20px;
+        }
+        .interpretation-text li {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Analyse-Dashboard: Industrielle Schadensfrüherkennung</h1>
+            <p class="subtitle">Ein interaktiver Vergleich von klassischen und State-of-the-Art ML-Ansätzen.</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'uebersicht')">Übersicht & Vergleich</button>
+            <button class="tab-button" onclick="openTab(event, 'dl-analyse')">Deep Learning Analyse</button>
+            <button class="tab-button" onclick="openTab(event, 'klassische-analyse')">Klassische Analyse</button>
+        </div>
+
+        <div id="uebersicht" class="tab-content active">
+            <div class="grid-container">
+                <div class="card">
+                    <h3>Multi-Kriterien-Modellvergleich</h3>
+                    <p>Ein Experte wählt nicht nur nach Genauigkeit. Dieses Diagramm vergleicht die Ansätze nach mehreren Kriterien, um den optimalen Kompromiss zu finden.</p>
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div class="card">
+                    <h3>Bestes Modell (F1-Score)</h3>
+                    <p id="bestModelText" style="font-size: 2.5rem; color: #bb86fc; font-weight: bold;">N/A</p>
+                    <hr>
+                    <h3>Fallstudie: Transfer Learning</h3>
+                    <p>Anpassung an neue Fehler mit nur **20 Datenpunkten**:</p>
+                    <p style="font-size: 1.5rem; text-align: center;">
+                        <span style="color: #ff7575;">~45%</span> <span style="font-size: 2rem;">&rarr;</span> <span style="color: #75ff75;">~92%</span>
+                    </p>
+                    <small>**Ohne TL (von Grund auf)** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Mit TL (fine-tuned)**</small>
+                </div>
+            </div>
+        </div>
+
+        <div id="dl-analyse" class="tab-content">
+            <div class="card">
+                <h3>Leistungsreport der Deep Learning Modelle</h3>
+                <p>Wählen Sie ein Modell, um den detaillierten Klassifikations-Report anzuzeigen.</p>
+                <div class="dl-tabs">
+                    <button id="cnn-btn" class="dl-tab-button active" onclick="displayReport('1D-CNN')">1D-CNN</button>
+                    <button id="trans-btn" class="dl-tab-button" onclick="displayReport('Transformer')">Transformer</button>
+                </div>
+                <div id="dl-report-container"></div>
+            </div>
+        </div>
+
+        <div id="klassische-analyse" class="tab-content">
+            <div class="card interpretation-grid">
+                <div>
+                    <h3>Interpretierbarkeit: RandomForest</h3>
+                    <p>Welche physikalischen Indikatoren sind für das klassische Modell entscheidend? Die Feature Importance gibt Aufschluss über die "Denkweise" des Modells.</p>
+                    <canvas id="featureImportanceChart"></canvas>
+                </div>
+                <div class="interpretation-text">
+                    <h4>Interpretation der Top-Merkmale:</h4>
+                    <ol>
+                        <li><strong>Amplitude der Zahneingriffsfrequenz (oa_gmf_...)</strong><br>Misst die Energie beim Ineinandergreifen der Zähne. Ein starker Indikator für allgemeine Getriebeprobleme.</li>
+                        <li><strong>Kurtosis (td_kurtosis)</strong><br>Erkennt impulsive Stöße durch Risse oder Pitting – ein klassisches Anzeichen für beginnende Schäden.</li>
+                        <li><strong>Energie der Seitenbänder (oa_gmf_..._sb_energy)</strong><br>Ein sehr spezifischer Indikator für lokalisierte Schäden an einem einzelnen Zahnrad.</li>
+                    </ol>
+                </div>
+            </div>
+             <div class="card">
+                <h3>Leistungsreport: RandomForest</h3>
+                <div id="rf-report-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modelData = '__MODEL_DATA_PLACEHOLDER__';
+        const featureData = '__FEATURE_IMPORTANCE_PLACEHOLDER__';
+
+        // Tabs öffnen
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // NEU: Funktion zum Erstellen einer Report-Tabelle aus JSON-Daten
+        function createReportTable(reportData) {
+            if (Object.keys(reportData).length === 0) {
+                return '<p>Report-Daten nicht verfügbar.</p>';
+            }
+
+            const table = document.createElement('table');
+            table.className = 'report-table';
+
+            // Header
+            const thead = table.createTHead();
+            const headerRow = thead.insertRow();
+            const headers = ['Klasse', 'Precision', 'Recall', 'F1-Score', 'Support'];
+            headers.forEach(text => {
+                const th = document.createElement('th');
+                th.textContent = text;
+                headerRow.appendChild(th);
+            });
+
+            // Body
+            const tbody = table.createTBody();
+            for (const key in reportData) {
+                const item = reportData[key];
+                if (typeof item === 'object') {
+                    const row = tbody.insertRow();
+                    row.insertCell().textContent = key;
+                    row.insertCell().textContent = item.precision?.toFixed(2) || 'N/A';
+                    row.insertCell().textContent = item.recall?.toFixed(2) || 'N/A';
+                    row.insertCell().textContent = item['f1-score']?.toFixed(2) || 'N/A';
+                    row.insertCell().textContent = item.support || 'N/A';
+                }
+            }
+            return table.outerHTML;
+        }
+
+        // NEU: Funktion zur Anzeige des Reports
+        function displayReport(modelName) {
+            // Button-Highlights umschalten
+            document.getElementById('cnn-btn').classList.remove('active');
+            document.getElementById('trans-btn').classList.remove('active');
+            if (modelName === '1D-CNN') document.getElementById('cnn-btn').classList.add('active');
+            if (modelName === 'Transformer') document.getElementById('trans-btn').classList.add('active');
+            
+            const report = modelData[modelName]?.report;
+            const container = document.getElementById('dl-report-container');
+            container.innerHTML = createReportTable(report);
+        }
+
+
+        // Beim Laden der Seite ausführen
+        document.addEventListener('DOMContentLoaded', () => {
+            // Radar Chart
+            const f1_rf = modelData.RandomForest?.f1Score || 0;
+            const f1_cnn = modelData['1D-CNN']?.f1Score || 0;
+            const f1_trans = modelData.Transformer?.f1Score || 0;
+
+            new Chart(document.getElementById('radarChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['F1-Score', 'Interpretierbarkeit', 'Geringe Trainingszeit', 'Datenhunger', 'Modellkomplexität'],
+                    datasets: [{
+                        label: 'RandomForest',
+                        data: [f1_rf, 0.9, 0.95, 0.9, 0.8],
+                        backgroundColor: 'rgba(100, 255, 100, 0.2)',
+                        borderColor: 'rgba(100, 255, 100, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: '1D-CNN',
+                        data: [f1_cnn, 0.5, 0.6, 0.4, 0.5],
+                        backgroundColor: 'rgba(100, 100, 255, 0.2)',
+                        borderColor: 'rgba(100, 100, 255, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Transformer',
+                        data: [f1_trans, 0.3, 0.2, 0.2, 0.2],
+                        backgroundColor: 'rgba(255, 100, 100, 0.2)',
+                        borderColor: 'rgba(255, 100, 100, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                     scales: {
+                        r: {
+                            angleLines: { color: '#555' },
+                            grid: { color: '#555' },
+                            pointLabels: { color: '#e0e0e0', font: { size: 14 } },
+                            ticks: { backdropColor: '#121212', color: '#e0e0e0' },
+                            min: 0,
+                            max: 1
+                        }
+                    },
+                    plugins: { legend: { labels: { color: '#e0e0e0' } } }
+                }
+            });
+
+            // Bestes Modell
+            const models = Object.entries(modelData).map(([name, data]) => ({ name, f1: data.f1Score }));
+            const bestModel = models.reduce((best, current) => current.f1 > best.f1 ? current : best, { f1: 0 });
+            if (bestModel.f1 > 0) {
+                 document.getElementById('bestModelText').textContent = `${bestModel.name} (${bestModel.f1.toFixed(2)})`;
+            } else {
+                 document.getElementById('bestModelText').textContent = 'N/A';
+            }
+           
+
+            // Feature Importance Chart
+            if (Object.keys(featureData).length > 0) {
+                new Chart(document.getElementById('featureImportanceChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(featureData).reverse(),
+                        datasets: [{
+                            label: 'Feature Importance',
+                            data: Object.values(featureData).reverse(),
+                            backgroundColor: '#bb86fc',
+                            borderColor: '#3700b3',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        scales: {
+                            x: { ticks: { color: '#e0e0e0' }, grid: { color: '#444' } },
+                            y: { ticks: { color: '#e0e0e0' }, grid: { color: '#444' } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Reports initial anzeigen
+            displayReport('1D-CNN');
+            const rfReportContainer = document.getElementById('rf-report-container');
+            rfReportContainer.innerHTML = createReportTable(modelData.RandomForest?.report);
+        });
+    </script>
+</body>
+</html>
